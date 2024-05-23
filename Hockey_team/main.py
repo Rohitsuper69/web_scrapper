@@ -69,6 +69,7 @@ def ensure_database_and_table(dbname,user,password,host,port):
 
     cur = conn.cursor()
 
+    # Execute the sql statements to create the table
     create_table_query = '''
     CREATE TABLE IF NOT EXISTS hockey_teams (
         id SERIAL PRIMARY KEY,
@@ -91,16 +92,21 @@ def ensure_database_and_table(dbname,user,password,host,port):
     except Exception as e:
         logging.error(f"Error creating table: {e}")
 
+    # Close the database connection
     cur.close()
     conn.close()
 
 # Function to scrape data from all pages of the webpage and save to the database
 def scrape_data_and_save_to_db(dbname,user,password,host,port):
     base_url = 'https://www.scrapethissite.com/pages/forms/'
+
+    #Check if the database and table exists if not then create them
     ensure_database_and_table(dbname,user,password,host,port)
+
+    #Fetch data for each page
     page = 1
     while True:
-        url = f"{base_url}?page_num={page}&per_page=25"
+        url = f"{base_url}?page_num={page}&per_page=25"  #Data per page can be changed to 50 or 100
         response = requests.get(url)
         soup = BeautifulSoup(response.text, 'html.parser')
         team_rows = soup.find_all('tr', class_='team')
@@ -146,21 +152,23 @@ def scrape_data_and_save_to_db(dbname,user,password,host,port):
                 connection.close()
                 print("PostgreSQL connection is closed")
 
-        # Check if there's a "Next" button
+        # Check if there's any more data
         next_button = soup.find('tr', class_='team')
         if not next_button:
-            break  # Exit loop if there's no "Next" button
+            break  # Exit loop if there's no more data
 
         # Move to the next page
         page += 1
 
 # Main function to start the scraping process
 def main():
+    #  Get the values from env file 
     dbname = os.getenv('DB_NAME')
     user = os.getenv('DB_USER')
     password = os.getenv('DB_PASSWORD')
     host = os.getenv('DB_HOST')
     port = os.getenv('DB_PORT')
+    # To scrap and save data to database
     scrape_data_and_save_to_db(dbname,user,password,host,port)
 
 if __name__ == '__main__':

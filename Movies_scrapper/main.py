@@ -7,10 +7,11 @@ import psycopg2
 from psycopg2 import sql
 from dotenv import load_dotenv
 
-
+## To connect to env file
 env_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 sys.path.append(env_path)
-
+ 
+## To log errors
 logging.basicConfig(
     filename='error.log',  # Name of the log file
     level=logging.ERROR,   # Log only messages with severity level ERROR or higher
@@ -20,6 +21,7 @@ logging.basicConfig(
 # Load environment variables from .env file
 load_dotenv()
 
+# Create database or pass if it already exists
 def create_database(dbname, user, password, host='localhost', port='5432'):
     conn = psycopg2.connect(dbname="postgres", user=user, password=password, host=host, port=port)
     conn.autocommit = True
@@ -34,24 +36,12 @@ def create_database(dbname, user, password, host='localhost', port='5432'):
         cur.close()
         conn.close()
 
-
+# To create the table and attributes for the data
 def create_table(dbname, user, password, host='localhost', port='5432'):
-    """
-    Create a new table named 'movies' in the specified database.
-
-    Parameters:
-    dbname (str): The name of the database.
-    user (str): The username to connect to the database.
-    password (str): The password to connect to the database.
-    host (str, optional): The host of the database. Default is 'localhost'.
-    port (str, optional): The port of the database. Default is '5432'.
-
-    Returns:
-    None
-    """
     conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)
     cur = conn.cursor()
     
+    # Execute the sql statements to create table
     create_table_query = '''
     CREATE TABLE movies (
         id SERIAL PRIMARY KEY,
@@ -63,6 +53,7 @@ def create_table(dbname, user, password, host='localhost', port='5432'):
     );
     '''
     
+    # Commit the changes into the database
     try:
         cur.execute(create_table_query)
         conn.commit()
@@ -84,17 +75,21 @@ def get_ajax_data(year):
     }
     
     response = requests.get(url, params=params, headers=headers)
-    if response.status_code != 200:
+    
+    # To report if there is any issue in accessing the data from the url
+    if response.status_code != 200:   
         logging.error(f"Failed to retrieve data for year {year}: HTTP status code {response.status_code}")
         return None
     
     return response.json()
 
+# To save the fetched data into the database 
 def save_to_db(movies, dbname, user, password, host='localhost', port='5432'):
     try:
         conn = psycopg2.connect(dbname=dbname, user=user, password=password, host=host, port=port)
         cur = conn.cursor()
-        
+         
+        # Execute the SQL INSERT statement
         for movie in movies:
             cur.execute("""
                 INSERT INTO movies (title, year, awards, nominations, best_picture)
@@ -108,13 +103,17 @@ def save_to_db(movies, dbname, user, password, host='localhost', port='5432'):
                 )
             )
         
+        # Commit the transaction
         conn.commit()
+
+        #Close the database connection
         cur.close()
         conn.close()
         
     except Exception as e:
         logging.error(f"Error saving data to database: {e}", exc_info=True)  # exc_info=True includes traceback information
 
+# Main function to start the scraping process
 def main():
     dbname = os.getenv('DB_NAME')
     user = os.getenv('DB_USER')
@@ -122,14 +121,16 @@ def main():
     host = os.getenv('DB_HOST')
     port = os.getenv('DB_PORT')
 
-    # Step 1: Create the database and table
+    # Create database and table based on the env variables
     create_database(dbname, user, password, host, port)
     create_table(dbname, user, password, host, port)
     
+    # Set the start and end year for the data to be fetched
     start_year = 2010
     end_year = 2015
     all_movies = []
 
+    # Fetch all the data from the range of years given the website
     for year in range(start_year, end_year + 1):
         movies = get_ajax_data(year)
         if movies is None:
@@ -142,7 +143,7 @@ def main():
             print(f"Unexpected data structure for year {year}")
             continue
         
-        time.sleep(1)
+        time.sleep(1) # Just to avoid multiple requests at a same time as some api's block access considering it spam
     
     print(f"Scraped {len(all_movies)} movies from {start_year} to {end_year}")
     

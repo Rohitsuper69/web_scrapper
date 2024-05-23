@@ -73,3 +73,7 @@ python Advance_forms/main.py
 ```
 
 Data can be accsessed by going to Servers->Postgre SQL(16)->{database_name}->Schemas->public->tables
+
+## Error Handling
+
+In case of any unexpected errors or scenarios the program will terminate with a log file containing the error description which can be used to analyse the problem.
