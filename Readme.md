@@ -20,6 +20,12 @@ This project scrapes movie data from a specified website for the years 2010 to 2
    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
    ```
 
+   To use venv (Virtual Environment) in Python, you typically don't need to install it separately because it's part of the Python standard library for versions 3.3 and above. However, if for some reason it's not available or you want to ensure you have the latest version, you can install it via pip:
+
+   ```bash
+   pip install virtualenv
+   ```
+
 3. Install the required packages:
 
    ```bash
@@ -34,32 +40,16 @@ This project scrapes movie data from a specified website for the years 2010 to 2
    DB_HOST=your_database_host
    DB_PORT=your_database_port
    ```
+   Remember to enclose all your credentials in quotes
+   The data is saved along 3 table in the datbase name given which comes under main postgres datbase they can be accessed using pgAdmin 4. If not installed it can be installed from
+   https://www.enterprisedb.com/downloads/postgres-postgresql-downloads. This must be done before running the scripts. Now create your credentials and assign port number(default 5432)
 
 ## Usage
 
-Run the main script to create the database and table, scrape movie data, and save it to the database.
-You can run all links at once to fetch the data or for the simplicity and useability of the code three different scripts are created for three different links. You can also run the desired script for our purpose seperately
-
-### Overall
+Run the main script to create the database and table, data, and save it to the database.
 
 ```bash
 python main.py
 ```
 
-### Link1
-
-```bash
-python Movies_scrapper/main.py
-```
-
-### Link2
-
-```bash
-python Hockey_team/main.py
-```
-
-### Link1
-
-```bash
-python Advance_forms/main.py
-```
+Data can be accsessed by going to Servers->Postgre SQL(16)->{database_name}->Schemas->public->tables
