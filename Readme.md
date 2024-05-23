@@ -52,4 +52,24 @@ Run the main script to create the database and table, data, and save it to the d
 python main.py
 ```
 
+If you want to run specific for each links then use the following commands
+
+### Link1(Movies Scrapper)
+
+```bash
+python Movies_scrapper/main.py
+```
+
+### Link2(Hockey Team)
+
+```bash
+python Hockey_team/main.py
+```
+
+### Link3(Advance Forms)
+
+```bash
+python Advance_forms/main.py
+```
+
 Data can be accsessed by going to Servers->Postgre SQL(16)->{database_name}->Schemas->public->tables
